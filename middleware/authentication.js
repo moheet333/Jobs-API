@@ -11,9 +11,9 @@ const authenticationMiddleware = async (req, res, next) => {
   const token = requestHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { userId, name } = decoded;
-    req.user = { userId: userId, name: name };
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // attach the user to the job routes
+    req.user = { userId: payload.userId, name: payload.name };
     next();
   } catch (error) {
     throw new UnauthenticatedError("Invalid Token");
