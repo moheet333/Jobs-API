@@ -21,7 +21,7 @@ const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
 const authenticationMiddleware = require("./middleware/authentication");
 
-app.set("trust proxy", 1);
+app.set("trust proxy", 3);
 app.use(
   rateLimiter({
     windowMs: 15 * 60 * 1000,
