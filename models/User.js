@@ -23,12 +23,23 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: [true, "Please provide password"],
   },
+  lastName: {
+    type: String,
+    trim: true,
+    maxlength: 20,
+    default: "lastname",
+  },
+  location: {
+    type: String,
+    trim: true,
+    maxlength: 40,
+    default: "my city",
+  },
 });
 
 UserSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 UserSchema.methods.getName = function () {
@@ -36,14 +47,13 @@ UserSchema.methods.getName = function () {
 };
 
 UserSchema.methods.getToken = async function () {
-  const token = await jwt.sign(
+  return jwt.sign(
     { userId: this._id, name: this.name },
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRESIN,
     }
   );
-  return token;
 };
 
 UserSchema.methods.comparePassword = async function (candidatePassword) {

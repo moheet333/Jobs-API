@@ -5,9 +5,15 @@ const { BadRequestError, UnauthenticatedError } = require("../errors/index");
 const register = async (req, res) => {
   const user = await User.create({ ...req.body });
   const token = await user.getToken();
-  res
-    .status(StatusCodes.CREATED)
-    .json({ user: { name: user.getName() }, token });
+  res.status(StatusCodes.CREATED).json({
+    user: {
+      email: user.email,
+      lastName: user.lastName, // default initially
+      location: user.location, // default initially
+      name: user.name,
+      token,
+    },
+  });
 };
 
 const login = async (req, res) => {
@@ -19,7 +25,6 @@ const login = async (req, res) => {
   if (!user) {
     throw new UnauthenticatedError("Invalid email");
   }
-
   const isPasswordCorrect = await user.comparePassword(password);
 
   if (!isPasswordCorrect) {
@@ -27,10 +32,48 @@ const login = async (req, res) => {
   }
   const token = await user.getToken();
 
-  res.status(StatusCodes.OK).json({ user: { name: user.getName() }, token });
+  res.status(StatusCodes.OK).json({
+    user: {
+      email: user.email,
+      lastName: user.lastName, // default initially
+      location: user.location, // default initially
+      name: user.name,
+      token,
+    },
+  });
+};
+
+const updateUser = async (req, res) => {
+  const { email, name, lastName, location } = req.body;
+  if (!email || !name || !lastName || !location) {
+    throw new BadRequest("Please provide all values");
+  }
+  const user = await User.findOneAndUpdate(
+    { _id: req.user.userId },
+    {
+      email: email,
+      name: name,
+      lastName: lastName,
+      location: location,
+    },
+    {
+      new: true,
+    }
+  );
+  const token = await user.getToken();
+  res.status(StatusCodes.OK).json({
+    user: {
+      email: user.email,
+      lastName: user.lastName,
+      location: user.location,
+      name: user.name,
+      token,
+    },
+  });
 };
 
 module.exports = {
   register,
   login,
+  updateUser,
 };
